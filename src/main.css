@@ -1,0 +1,264 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Base ───────────────────────────────────────────────── */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-ink-50 font-body text-ink-900 antialiased;
+    font-feature-settings: "cv11", "ss01", "ss03";
+  }
+
+  ::selection {
+    @apply bg-indigo-600 text-white;
+  }
+
+  /* Scroll-margin so anchors clear the sticky nav */
+  section[id] {
+    scroll-margin-top: 5rem;
+  }
+}
+
+/* ── Components ─────────────────────────────────────────── */
+@layer components {
+  .page-shell {
+    @apply mx-auto max-w-6xl px-6;
+  }
+
+  .eyebrow {
+    @apply font-body text-[0.72rem] font-semibold uppercase tracking-[0.22em] text-indigo-600;
+  }
+
+  .section-card {
+    @apply rounded-xl border border-ink-200 bg-white p-7 transition-all duration-200 hover:border-indigo-300 hover:shadow-card-hover;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 font-body text-sm font-medium text-white shadow-sm transition-all hover:bg-indigo-700 hover:shadow-glow focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-ink-50;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 rounded-lg border border-ink-300 bg-white px-5 py-2.5 font-body text-sm font-medium text-ink-900 shadow-sm transition-all hover:border-ink-400 hover:bg-ink-50 focus:outline-none focus:ring-2 focus:ring-ink-400 focus:ring-offset-2 focus:ring-offset-ink-50;
+  }
+
+  .nav-link {
+    @apply relative font-body text-sm text-ink-600 transition-colors hover:text-ink-950;
+  }
+
+  .nav-link[data-active="true"] {
+    @apply text-indigo-700;
+  }
+
+  .nav-link[data-active="true"]::after {
+    content: "";
+    @apply absolute left-0 -bottom-[18px] h-[2px] w-full bg-indigo-600;
+  }
+
+  .state-pill {
+    @apply inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 font-mono text-[0.7rem] font-medium;
+  }
+
+  .state-available { @apply border-emerald-200 bg-emerald-50 text-emerald-800; }
+  .state-claimed   { @apply border-amber-200 bg-amber-50 text-amber-800; }
+  .state-done      { @apply border-indigo-200 bg-indigo-50 text-indigo-800; }
+  .state-failed    { @apply border-rose-200 bg-rose-50 text-rose-800; }
+  .state-canceled  { @apply border-ink-200 bg-ink-100 text-ink-700; }
+}
+
+/* ── Terminal card ──────────────────────────────────────── */
+.terminal {
+  background: linear-gradient(180deg, #0d1226 0%, #0a0e1f 100%);
+  border-radius: 14px;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.04) inset,
+    0 0 0 1px rgba(255,255,255,0.04),
+    0 24px 60px -20px rgba(9,9,30,0.55),
+    0 8px 24px -8px rgba(9,9,30,0.35);
+  overflow: hidden;
+  font-family: "JetBrains Mono", "SF Mono", "Fira Code", Menlo, monospace;
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: #c7d2fe;
+}
+
+.terminal-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.75rem 1rem;
+  background: rgba(255,255,255,0.02);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.terminal-dot {
+  width: 12px; height: 12px; border-radius: 50%;
+  box-shadow: inset 0 0 0 0.5px rgba(0,0,0,0.2);
+}
+
+.terminal-dot.red    { background: #ff5f57; }
+.terminal-dot.yellow { background: #febc2e; }
+.terminal-dot.green  { background: #28c840; }
+
+.terminal-title {
+  flex: 1; text-align: center;
+  font-size: 0.72rem; color: #6b7290;
+  font-family: Inter, system-ui, sans-serif;
+  letter-spacing: 0.04em;
+}
+
+.terminal-body {
+  padding: 1.25rem 1.5rem;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.terminal-body .prompt::before {
+  content: "$ ";
+  color: #6366f1;
+  font-weight: 600;
+  user-select: none;
+}
+
+.terminal-body .cursor {
+  display: inline-block;
+  width: 0.55em;
+  background: #818cf8;
+  color: #818cf8;
+  margin-left: 2px;
+  animation: cq-blink 1.05s steps(2, start) infinite;
+}
+
+@keyframes cq-blink {
+  to { visibility: hidden; }
+}
+
+/* ── Prism custom theme (Tokyo Night–ish, tuned for indigo) ── */
+.terminal-body pre[class*="language-"],
+.terminal-body code[class*="language-"] {
+  background: transparent !important;
+  color: #d6deff;
+  text-shadow: none;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+  tab-size: 2;
+  margin: 0;
+  padding: 0;
+}
+
+.terminal-body .token.comment,
+.terminal-body .token.prolog,
+.terminal-body .token.cdata { color: #565f89; font-style: italic; }
+.terminal-body .token.punctuation { color: #89a0c8; }
+
+/* shell */
+.terminal-body .token.shebang { color: #565f89; }
+.terminal-body .token.command,
+.terminal-body .token.function { color: #7aa2f7; font-weight: 500; }
+.terminal-body .token.builtin { color: #7dcfff; }
+.terminal-body .token.parameter,
+.terminal-body .token.variable { color: #f7768e; }
+.terminal-body .token.assign-left,
+.terminal-body .token.environment { color: #e0af68; }
+.terminal-body .token.operator { color: #89ddff; }
+.terminal-body .token.keyword { color: #bb9af7; }
+.terminal-body .token.string,
+.terminal-body .token.regex { color: #9ece6a; }
+.terminal-body .token.number,
+.terminal-body .token.boolean { color: #ff9e64; }
+
+/* json */
+.terminal-body .language-json .token.property { color: #7aa2f7; }
+.terminal-body .language-json .token.string { color: #9ece6a; }
+.terminal-body .language-json .token.number { color: #ff9e64; }
+.terminal-body .language-json .token.boolean { color: #bb9af7; }
+.terminal-body .language-json .token.null { color: #f7768e; }
+
+.terminal-body .stdout { color: #a9b1d6; }
+.terminal-body .muted  { color: #565f89; }
+.terminal-body .ok     { color: #9ece6a; }
+.terminal-body .warn   { color: #e0af68; }
+.terminal-body .err    { color: #f7768e; }
+.terminal-body .keylit { color: #7dcfff; }
+
+/* Copy button on terminal */
+.terminal-wrap {
+  position: relative;
+}
+
+.copy-btn {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.75rem;
+  z-index: 2;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+  color: #c7d2fe;
+  padding: 0.3rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.68rem;
+  font-family: Inter, system-ui, sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s;
+  cursor: pointer;
+}
+
+.terminal-wrap:hover .copy-btn { opacity: 1; }
+.copy-btn:hover { background: rgba(255,255,255,0.12); }
+.copy-btn.copied { background: rgba(99,102,241,0.30); color: #e0e7ff; border-color: rgba(129,140,248,0.5); }
+
+/* Inline code outside the terminal */
+.inline-code {
+  @apply rounded-md border border-ink-200 bg-ink-100 px-1.5 py-0.5 font-mono text-[0.85em] text-ink-800;
+}
+
+/* Sticky nav backdrop */
+.nav-glass {
+  background: rgba(250, 250, 250, 0.78);
+  backdrop-filter: saturate(180%) blur(10px);
+  -webkit-backdrop-filter: saturate(180%) blur(10px);
+  border-bottom: 1px solid rgba(228, 228, 231, 0.7);
+}
+
+/* Subtle decorative grid behind hero */
+.hero-grid {
+  background-image:
+    linear-gradient(to right, rgba(99,102,241,0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(99,102,241,0.06) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, #000 30%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, #000 30%, transparent 75%);
+}
+
+/* State diagram arrows */
+.state-arrow {
+  stroke: #a1a1aa;
+  stroke-width: 1.5;
+  fill: none;
+  marker-end: url(#arrowhead);
+}
+
+.state-arrow.disallowed {
+  stroke: #f4f4f5;
+  stroke-dasharray: 4 4;
+}
+
+.state-node {
+  fill: white;
+  stroke: #d4d4d8;
+  stroke-width: 1.5;
+}
+
+.state-node.terminal {
+  fill: #fafafa;
+}

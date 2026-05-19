@@ -1,0 +1,12 @@
+{
+  "name": "contextq-longship-dev",
+  "private": true,
+  "scripts": {
+    "build:css": "tailwindcss -i ./src/main.css -o ./styles.css --minify",
+    "dev:css": "tailwindcss -i ./src/main.css -o ./styles.css --watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/typography": "latest",
+    "tailwindcss": "^3.4.0"
+  }
+}

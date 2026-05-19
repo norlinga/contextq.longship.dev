@@ -1,0 +1,853 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>contextq — Local queues for AI agents</title>
+  <meta name="description" content="ContextQ is a tiny local CLI for agent coordination: named queues with agent-facing context, FIFO claims over string keys, and a durable event journal. Designed for tightly-coupled agent skills and narrow agent-facing tooling.">
+  <meta property="og:title" content="contextq — Local queues for AI agents">
+  <meta property="og:description" content="A tiny local CLI for agent coordination: named queues, FIFO claims, a durable event journal.">
+  <meta property="og:type" content="website">
+  <link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body class="min-h-screen">
+
+  <!-- ───── Sticky Nav ───── -->
+  <nav class="nav-glass sticky top-0 z-40">
+    <div class="page-shell flex items-center justify-between h-16">
+      <a href="#top" class="flex items-center gap-2.5 group" aria-label="contextq home">
+        <img src="./assets/logo.svg" alt="" class="h-7 w-7">
+        <span class="font-display text-lg font-bold tracking-tight text-ink-950 group-hover:text-indigo-700 transition-colors">contextq</span>
+      </a>
+
+      <ul class="hidden md:flex items-center gap-7">
+        <li><a class="nav-link" href="#thesis">Thesis</a></li>
+        <li><a class="nav-link" href="#what">What it is</a></li>
+        <li><a class="nav-link" href="#quickstart">Quickstart</a></li>
+        <li><a class="nav-link" href="#concepts">Concepts</a></li>
+        <li><a class="nav-link" href="#cli">CLI</a></li>
+        <li><a class="nav-link" href="#agent-skill">Agent skill</a></li>
+      </ul>
+
+      <a href="https://github.com/norlinga/contextq" target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-lg border border-ink-300 bg-white px-3 py-1.5 text-sm font-medium text-ink-900 transition hover:border-ink-400 hover:bg-ink-50">
+        <svg viewBox="0 0 16 16" class="h-4 w-4" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.05-.49.05-.49.8.06 1.23.83 1.23.83.72 1.22 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.22 2.2.82a7.6 7.6 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.52-1.04 2.19-.82 2.19-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.74-3.65 3.94.29.25.54.73.54 1.48v2.19c0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+          GitHub
+      </a>
+    </div>
+  </nav>
+
+  <main id="top">
+
+  <!-- ───── Hero ───── -->
+  <section class="relative overflow-hidden">
+    <div class="hero-grid absolute inset-0 -z-10" aria-hidden="true"></div>
+
+    <div class="page-shell pt-20 pb-24 md:pt-28 md:pb-32">
+      <div class="grid lg:grid-cols-12 gap-14 items-center">
+
+        <div class="lg:col-span-7">
+          <p class="eyebrow mb-6">Open source · MIT</p>
+
+          <h1 class="font-display font-bold tracking-tight text-ink-950 text-5xl md:text-6xl lg:text-7xl leading-[1.04]">
+            Local queues<br>
+            for <span class="text-indigo-700">agents</span>.
+          </h1>
+
+          <p class="mt-8 max-w-2xl font-body text-lg md:text-xl leading-relaxed text-ink-700">
+            <strong class="text-ink-950 font-semibold">ContextQ</strong> is a tiny local CLI for agent coordination: named queues with agent-facing context, FIFO claims over string keys, and a durable event journal you can read off disk. An experiment in the kind of <em>narrow, agent-facing tooling</em> that lets agents stay focused without bloating their context windows.
+          </p>
+
+          <div class="mt-10 flex flex-wrap items-center gap-4">
+            <a href="#quickstart" class="btn-primary">
+              Get started
+              <svg viewBox="0 0 20 20" class="h-4 w-4" fill="currentColor" aria-hidden="true"><path d="M10.293 3.293a1 1 0 0 1 1.414 0l6 6a1 1 0 0 1 0 1.414l-6 6a1 1 0 0 1-1.414-1.414L14.586 11H3a1 1 0 1 1 0-2h11.586l-4.293-4.293a1 1 0 0 1 0-1.414Z"/></svg>
+            </a>
+            <a href="https://github.com/norlinga/contextq" target="_blank" rel="noopener" class="btn-secondary">
+              <svg viewBox="0 0 16 16" class="h-4 w-4" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.05-.49.05-.49.8.06 1.23.83 1.23.83.72 1.22 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.22 2.2.82a7.6 7.6 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.52-1.04 2.19-.82 2.19-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.74-3.65 3.94.29.25.54.73.54 1.48v2.19c0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+              View on GitHub
+            </a>
+          </div>
+
+          <p class="mt-8 font-mono text-xs text-ink-500">
+            <span class="text-indigo-600 font-semibold">→</span>
+            <span class="inline-code">go install github.com/norlinga/contextq/cmd/contextq@latest</span>
+          </p>
+        </div>
+
+        <div class="lg:col-span-5">
+          <div class="terminal-wrap">
+            <button class="copy-btn" data-target="hero-term">Copy</button>
+            <div class="terminal">
+              <div class="terminal-header">
+                <span class="terminal-dot red"></span>
+                <span class="terminal-dot yellow"></span>
+                <span class="terminal-dot green"></span>
+                <span class="terminal-title">~/projects/myrepo &nbsp;—&nbsp; contextq</span>
+              </div>
+              <div class="terminal-body" id="hero-term">
+<span class="prompt"></span><span class="token function">contextq</span> <span class="token builtin">queue</span> <span class="token builtin">create</span> <span class="token string">"Triage stale GitHub issues"</span> <span class="token parameter">--name</span> triage
+<span class="ok">✓ queue created</span> <span class="muted">4f8b2c…c2e1</span>
+
+<span class="prompt"></span><span class="token function">contextq</span> <span class="token builtin">item</span> <span class="token builtin">push</span> triage <span class="keylit">issue-142</span>
+<span class="ok">✓ queued</span> <span class="keylit">issue-142</span>
+
+<span class="prompt"></span><span class="token function">contextq</span> <span class="token parameter">--json</span> <span class="token builtin">item</span> <span class="token builtin">pop</span> triage
+<span class="token punctuation">{</span>
+  <span class="token property">"key"</span><span class="token punctuation">:</span> <span class="token string">"issue-142"</span><span class="token punctuation">,</span>
+  <span class="token property">"state"</span><span class="token punctuation">:</span> <span class="token string">"CLAIMED"</span><span class="token punctuation">,</span>
+  <span class="token property">"item_id"</span><span class="token punctuation">:</span> <span class="token string">"d5ce2a29-…01c9"</span>
+<span class="token punctuation">}</span>
+
+<span class="prompt"></span><span class="token function">contextq</span> <span class="token builtin">item</span> <span class="token builtin">update</span> triage <span class="keylit">issue-142</span> <span class="ok">DONE</span>
+<span class="ok">✓ DONE</span> <span class="muted">in 1.2s</span><span class="cursor">▍</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ───── Thesis ───── -->
+  <section id="thesis" class="py-24 md:py-32 border-t border-ink-200 bg-white">
+    <div class="page-shell">
+      <p class="eyebrow mb-5">The premise</p>
+      <h2 class="font-display text-4xl md:text-5xl font-bold tracking-tight text-ink-950 max-w-3xl leading-tight">
+        Modern CLIs answer to two readers: humans <em class="not-italic text-indigo-700">and</em> agents.
+      </h2>
+      <p class="mt-6 max-w-2xl font-body text-lg leading-relaxed text-ink-700">
+        Once an agent is the one invoking your tool, the shape of its output, its error model, and the protocol it enforces all become first-class design surfaces. Modern command-line tooling has to consider agent-native workflows, not just human ergonomics.
+      </p>
+
+      <div class="mt-12 rounded-2xl bg-ink-950 px-8 py-10 md:px-12 md:py-14 shadow-card">
+        <p class="eyebrow text-indigo-300 mb-6">Core thesis</p>
+        <blockquote class="font-display text-2xl md:text-3xl leading-snug md:leading-snug text-white/95 max-w-4xl">
+          "Good agent-facing tools are <em class="text-indigo-300 not-italic font-semibold">narrow</em>, <em class="text-indigo-300 not-italic font-semibold">predictable</em>, and <em class="text-indigo-300 not-italic font-semibold">deterministic</em>. They give agents structured answers instead of ambiguous prose — keeping context windows focused, response times short, and behavior on a known path."
+        </blockquote>
+        <p class="mt-6 font-body text-sm text-white/50 max-w-3xl leading-relaxed">
+          ContextQ is one small experiment in that direction: a CLI shaped specifically for how an agent reads, claims, and reports on work — paired with a tightly-coupled <a href="#agent-skill" class="text-indigo-300 hover:text-indigo-200 underline-offset-4 hover:underline">Agent Skill</a> the agent reads first.
+        </p>
+      </div>
+
+      <div class="mt-14 grid md:grid-cols-3 gap-5">
+        <article class="section-card">
+          <p class="eyebrow mb-3">Focused context</p>
+          <h3 class="font-display text-xl font-semibold text-ink-950 leading-snug">
+            Structured answers, not free-form prose
+          </h3>
+          <p class="mt-3 font-body text-ink-600 leading-relaxed">
+            A CLI returns one shape, every time. <span class="inline-code">--json</span> with stable error codes means the agent doesn't need to read paragraphs to know what happened — it branches on a field.
+          </p>
+        </article>
+
+        <article class="section-card">
+          <p class="eyebrow mb-3">Predictable cost</p>
+          <h3 class="font-display text-xl font-semibold text-ink-950 leading-snug">
+            Short, bounded tool calls
+          </h3>
+          <p class="mt-3 font-body text-ink-600 leading-relaxed">
+            Agent-facing tools should be cheap to call and small in their output. A queue read is a few lines, not a Markdown wall the agent has to re-parse on every turn.
+          </p>
+        </article>
+
+        <article class="section-card">
+          <p class="eyebrow mb-3">On the rails</p>
+          <h3 class="font-display text-xl font-semibold text-ink-950 leading-snug">
+            Tools that enforce a protocol
+          </h3>
+          <p class="mt-3 font-body text-ink-600 leading-relaxed">
+            ContextQ rejects races, duplicate work, and invalid state transitions at the CLI boundary — so the agent's plan can't drift into shapes the system was never built to handle.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───── What it is ───── -->
+  <section id="what" class="py-24 md:py-32 border-t border-ink-200">
+    <div class="page-shell">
+      <p class="eyebrow mb-5">What ContextQ is</p>
+      <h2 class="font-display text-4xl md:text-5xl font-bold tracking-tight text-ink-950 max-w-3xl leading-tight">
+        A small, local coordination primitive.
+      </h2>
+      <p class="mt-6 max-w-2xl font-body text-lg leading-relaxed text-ink-700">
+        ContextQ keeps project-specific named queues on disk to coordinate multi-agent work — or single-agent work split across time — without each turn rebuilding context from Markdown sprawl.
+      </p>
+
+      <div class="mt-14 grid md:grid-cols-3 gap-5">
+        <article class="section-card">
+          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 text-indigo-700 mb-5">
+            <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+          </div>
+          <h3 class="font-display text-xl font-semibold text-ink-950">Named queues with context</h3>
+          <p class="mt-3 font-body text-ink-600 leading-relaxed">
+            Every queue carries a required block of guidance text written <em>for the agent</em>. The first thing any consumer does is read the queue and follow its instructions.
+          </p>
+        </article>
+
+        <article class="section-card">
+          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 text-indigo-700 mb-5">
+            <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h14M11 6l6 6-6 6"/><circle cx="20" cy="12" r="1.5"/></svg>
+          </div>
+          <h3 class="font-display text-xl font-semibold text-ink-950">FIFO over string keys</h3>
+          <p class="mt-3 font-body text-ink-600 leading-relaxed">
+            Work items are bare string keys — file paths, issue IDs, task IDs. <span class="inline-code">pop</span> atomically claims the oldest available item; a key can be re-enqueued for a fresh lifecycle.
+          </p>
+        </article>
+
+        <article class="section-card">
+          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 text-indigo-700 mb-5">
+            <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h8M8 17h5"/></svg>
+          </div>
+          <h3 class="font-display text-xl font-semibold text-ink-950">Durable event journal</h3>
+          <p class="mt-3 font-body text-ink-600 leading-relaxed">
+            Everything is appended to a per-queue <span class="inline-code">events.jsonl</span> under <span class="inline-code">./contextq/</span>. Inspect it with <span class="inline-code">cat</span>, recover state from disk, and trust the history.
+          </p>
+        </article>
+      </div>
+
+      <div class="mt-12 grid md:grid-cols-3 gap-5">
+        <div class="rounded-xl border border-ink-200 bg-ink-50/60 p-6">
+          <p class="font-display text-2xl font-semibold text-ink-950">Local-first</p>
+          <p class="mt-2 font-body text-sm text-ink-600 leading-relaxed">No daemon, no server, no network. Just files on disk under <span class="inline-code">./contextq/</span>.</p>
+        </div>
+        <div class="rounded-xl border border-ink-200 bg-ink-50/60 p-6">
+          <p class="font-display text-2xl font-semibold text-ink-950">Inspectable</p>
+          <p class="mt-2 font-body text-sm text-ink-600 leading-relaxed">Open <span class="inline-code">events.jsonl</span> in any editor. Replay the journal to derive current state.</p>
+        </div>
+        <div class="rounded-xl border border-ink-200 bg-ink-50/60 p-6">
+          <p class="font-display text-2xl font-semibold text-ink-950">Concurrency-safe</p>
+          <p class="mt-2 font-body text-sm text-ink-600 leading-relaxed">Per-queue file lock serializes mutations. <span class="inline-code">pop</span> runs under the lock so claims never race.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───── Quickstart ───── -->
+  <section id="quickstart" class="py-24 md:py-32 border-t border-ink-200 bg-white">
+    <div class="page-shell">
+      <p class="eyebrow mb-5">Quickstart</p>
+      <h2 class="font-display text-4xl md:text-5xl font-bold tracking-tight text-ink-950 max-w-3xl leading-tight">
+        Five commands and you're coordinating.
+      </h2>
+      <p class="mt-6 max-w-2xl font-body text-lg leading-relaxed text-ink-700">
+        Install, create a queue with agent-facing context, push some work, claim it, and complete it.
+      </p>
+
+      <div class="mt-12 grid lg:grid-cols-2 gap-10">
+
+        <!-- Install -->
+        <div>
+          <div class="flex items-baseline gap-3 mb-4">
+            <span class="font-mono text-xs text-indigo-600 font-semibold">01</span>
+            <h3 class="font-display text-2xl font-semibold text-ink-950">Install</h3>
+          </div>
+          <p class="font-body text-ink-600 leading-relaxed mb-5">
+            Build from source. ContextQ is a single Go binary with no runtime dependencies.
+          </p>
+          <div class="terminal-wrap">
+            <button class="copy-btn" data-target="t-install">Copy</button>
+            <div class="terminal">
+              <div class="terminal-header">
+                <span class="terminal-dot red"></span><span class="terminal-dot yellow"></span><span class="terminal-dot green"></span>
+                <span class="terminal-title">install</span>
+              </div>
+              <div class="terminal-body" id="t-install">
+<span class="muted"># clone and build</span>
+<span class="prompt"></span><span class="token function">git</span> <span class="token builtin">clone</span> https://github.com/norlinga/contextq
+<span class="prompt"></span><span class="token function">cd</span> contextq
+<span class="prompt"></span><span class="token function">make</span> install
+
+<span class="ok">→</span> <span class="muted">installed</span> <span class="keylit">~/.local/bin/contextq</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Create -->
+        <div>
+          <div class="flex items-baseline gap-3 mb-4">
+            <span class="font-mono text-xs text-indigo-600 font-semibold">02</span>
+            <h3 class="font-display text-2xl font-semibold text-ink-950">Create a queue</h3>
+          </div>
+          <p class="font-body text-ink-600 leading-relaxed mb-5">
+            The context string is required — it's the agent-facing brief every consumer reads first.
+          </p>
+          <div class="terminal-wrap">
+            <button class="copy-btn" data-target="t-create">Copy</button>
+            <div class="terminal">
+              <div class="terminal-header">
+                <span class="terminal-dot red"></span><span class="terminal-dot yellow"></span><span class="terminal-dot green"></span>
+                <span class="terminal-title">create</span>
+              </div>
+              <div class="terminal-body" id="t-create">
+<span class="prompt"></span><span class="token function">contextq</span> <span class="token builtin">queue</span> <span class="token builtin">create</span> \
+    <span class="token string">"Refactor these files carefully.
+     Preserve public behavior and update tests."</span> \
+    <span class="token parameter">--name</span> refactor
+
+<span class="ok">✓ queue created</span>
+  <span class="muted">id  </span> <span class="keylit">9f8b6d35-3d7d-46fb-8d4b-7d770a9718f1</span>
+  <span class="muted">name</span> refactor
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Push -->
+        <div>
+          <div class="flex items-baseline gap-3 mb-4">
+            <span class="font-mono text-xs text-indigo-600 font-semibold">03</span>
+            <h3 class="font-display text-2xl font-semibold text-ink-950">Push work</h3>
+          </div>
+          <p class="font-body text-ink-600 leading-relaxed mb-5">
+            Items are stable string keys. File paths work well; so do issue IDs or task IDs.
+          </p>
+          <div class="terminal-wrap">
+            <button class="copy-btn" data-target="t-push">Copy</button>
+            <div class="terminal">
+              <div class="terminal-header">
+                <span class="terminal-dot red"></span><span class="terminal-dot yellow"></span><span class="terminal-dot green"></span>
+                <span class="terminal-title">push</span>
+              </div>
+              <div class="terminal-body" id="t-push">
+<span class="prompt"></span><span class="token function">contextq</span> <span class="token builtin">item</span> <span class="token builtin">push</span> refactor <span class="keylit">internal/cli/root.go</span>
+<span class="prompt"></span><span class="token function">contextq</span> <span class="token builtin">item</span> <span class="token builtin">push</span> refactor <span class="keylit">internal/fsstore/store.go</span>
+<span class="prompt"></span><span class="token function">contextq</span> <span class="token builtin">item</span> <span class="token builtin">push</span> refactor <span class="keylit">internal/domain/queue.go</span>
+
+<span class="prompt"></span><span class="token function">contextq</span> <span class="token builtin">queue</span> <span class="token builtin">read</span> refactor
+<span class="muted">queue</span> refactor
+<span class="muted">items</span> <span class="ok">3 available</span> · 0 claimed · 0 done
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pop & complete -->
+        <div>
+          <div class="flex items-baseline gap-3 mb-4">
+            <span class="font-mono text-xs text-indigo-600 font-semibold">04</span>
+            <h3 class="font-display text-2xl font-semibold text-ink-950">Pop &amp; complete</h3>
+          </div>
+          <p class="font-body text-ink-600 leading-relaxed mb-5">
+            <span class="inline-code">pop</span> atomically claims the oldest available item under the queue's file lock — no races.
+          </p>
+          <div class="terminal-wrap">
+            <button class="copy-btn" data-target="t-pop">Copy</button>
+            <div class="terminal">
+              <div class="terminal-header">
+                <span class="terminal-dot red"></span><span class="terminal-dot yellow"></span><span class="terminal-dot green"></span>
+                <span class="terminal-title">pop</span>
+              </div>
+              <div class="terminal-body" id="t-pop">
+<span class="prompt"></span><span class="token function">contextq</span> <span class="token parameter">--json</span> <span class="token builtin">item</span> <span class="token builtin">pop</span> refactor
+<span class="token punctuation">{</span>
+  <span class="token property">"key"</span><span class="token punctuation">:</span> <span class="token string">"internal/cli/root.go"</span><span class="token punctuation">,</span>
+  <span class="token property">"state"</span><span class="token punctuation">:</span> <span class="token string">"CLAIMED"</span><span class="token punctuation">,</span>
+  <span class="token property">"item_id"</span><span class="token punctuation">:</span> <span class="token string">"d5ce2a29-f818-4af4-a9ef-5bb7ab7f01c9"</span>
+<span class="token punctuation">}</span>
+
+<span class="muted"># …agent does the work…</span>
+
+<span class="prompt"></span><span class="token function">contextq</span> <span class="token builtin">item</span> <span class="token builtin">update</span> refactor <span class="keylit">internal/cli/root.go</span> <span class="ok">DONE</span>
+<span class="ok">✓ DONE</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Inspect -->
+        <div class="lg:col-span-2">
+          <div class="flex items-baseline gap-3 mb-4">
+            <span class="font-mono text-xs text-indigo-600 font-semibold">05</span>
+            <h3 class="font-display text-2xl font-semibold text-ink-950">Inspect history</h3>
+          </div>
+          <p class="font-body text-ink-600 leading-relaxed mb-5">
+            Every transition is in the event journal. <span class="inline-code">history</span> shows every lifecycle for a key, including retries.
+          </p>
+          <div class="terminal-wrap">
+            <button class="copy-btn" data-target="t-history">Copy</button>
+            <div class="terminal">
+              <div class="terminal-header">
+                <span class="terminal-dot red"></span><span class="terminal-dot yellow"></span><span class="terminal-dot green"></span>
+                <span class="terminal-title">history</span>
+              </div>
+              <div class="terminal-body" id="t-history">
+<span class="prompt"></span><span class="token function">contextq</span> <span class="token builtin">item</span> <span class="token builtin">history</span> refactor <span class="keylit">internal/cli/root.go</span>
+<span class="muted">2026-05-16T21:00:00Z</span>  <span class="ok">ITEM_PUSHED</span>      <span class="muted">item d5ce2a29…</span>
+<span class="muted">2026-05-16T21:04:11Z</span>  <span class="warn">ITEM_CLAIMED</span>     <span class="muted">item d5ce2a29…</span>
+<span class="muted">2026-05-16T21:09:43Z</span>  <span class="err">ITEM_FAILED</span>      <span class="muted">item d5ce2a29…</span>
+<span class="muted">2026-05-16T21:12:08Z</span>  <span class="ok">ITEM_PUSHED</span>      <span class="muted">item a14b9e02… (retry)</span>
+<span class="muted">2026-05-16T21:12:55Z</span>  <span class="warn">ITEM_CLAIMED</span>     <span class="muted">item a14b9e02…</span>
+<span class="muted">2026-05-16T21:18:32Z</span>  <span class="ok">ITEM_DONE</span>        <span class="muted">item a14b9e02…</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ───── Concepts ───── -->
+  <section id="concepts" class="py-24 md:py-32 border-t border-ink-200">
+    <div class="page-shell">
+      <p class="eyebrow mb-5">Core concepts</p>
+      <h2 class="font-display text-4xl md:text-5xl font-bold tracking-tight text-ink-950 max-w-3xl leading-tight">
+        A small model, deliberately.
+      </h2>
+      <p class="mt-6 max-w-2xl font-body text-lg leading-relaxed text-ink-700">
+        Three nouns, five states. Everything else falls out of those.
+      </p>
+
+      <div class="mt-14 grid md:grid-cols-3 gap-5">
+        <article class="section-card">
+          <p class="eyebrow mb-3">Noun · 1</p>
+          <h3 class="font-display text-xl font-semibold text-ink-950">Queue</h3>
+          <p class="mt-3 font-body text-ink-600 leading-relaxed">
+            A durable container with a <strong>required context string</strong> for agents. Optionally named (names don't have to be unique; UUIDs disambiguate).
+          </p>
+        </article>
+        <article class="section-card">
+          <p class="eyebrow mb-3">Noun · 2</p>
+          <h3 class="font-display text-xl font-semibold text-ink-950">Key</h3>
+          <p class="mt-3 font-body text-ink-600 leading-relaxed">
+            A stable string identifier — file path, issue ID, anything meaningful. Unique per queue at any moment, but the same key can be re-enqueued for a fresh lifecycle.
+          </p>
+        </article>
+        <article class="section-card">
+          <p class="eyebrow mb-3">Noun · 3</p>
+          <h3 class="font-display text-xl font-semibold text-ink-950">Item lifecycle</h3>
+          <p class="mt-3 font-body text-ink-600 leading-relaxed">
+            One pass through the state machine for one enqueue of a key. Each lifecycle gets its own <span class="inline-code">item_id</span> and its own history.
+          </p>
+        </article>
+      </div>
+
+      <!-- State machine -->
+      <div class="mt-16">
+        <h3 class="font-display text-2xl font-semibold text-ink-950 mb-2">State machine</h3>
+        <p class="font-body text-ink-600 leading-relaxed max-w-2xl mb-8">
+          Five states, five legal transitions. Terminal states are terminal — to retry, push the key again.
+        </p>
+
+        <div class="rounded-xl border border-ink-200 bg-white p-8 md:p-12 shadow-card">
+          <div class="flex flex-wrap items-center gap-3 mb-10">
+            <span class="state-pill state-available"><span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>AVAILABLE</span>
+            <span class="text-ink-400">→</span>
+            <span class="state-pill state-claimed"><span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>CLAIMED</span>
+            <span class="text-ink-400">→</span>
+            <span class="state-pill state-done"><span class="h-1.5 w-1.5 rounded-full bg-indigo-500"></span>DONE</span>
+            <span class="text-ink-300">·</span>
+            <span class="state-pill state-failed"><span class="h-1.5 w-1.5 rounded-full bg-rose-500"></span>FAILED</span>
+            <span class="text-ink-300">·</span>
+            <span class="state-pill state-canceled"><span class="h-1.5 w-1.5 rounded-full bg-ink-400"></span>CANCELED</span>
+          </div>
+
+          <svg viewBox="0 0 760 280" class="w-full h-auto" role="img" aria-label="ContextQ item state diagram">
+            <defs>
+              <marker id="arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M0,0 L10,5 L0,10 Z" fill="#a1a1aa"/>
+              </marker>
+              <marker id="arrowhead-indigo" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M0,0 L10,5 L0,10 Z" fill="#6366f1"/>
+              </marker>
+            </defs>
+
+            <!-- Nodes -->
+            <g font-family="JetBrains Mono, monospace" font-size="13" font-weight="600">
+              <!-- AVAILABLE -->
+              <rect x="40"  y="115" width="130" height="50" rx="10" fill="#ecfdf5" stroke="#10b981" stroke-width="1.5"/>
+              <text x="105" y="146" text-anchor="middle" fill="#065f46">AVAILABLE</text>
+
+              <!-- CLAIMED -->
+              <rect x="315" y="115" width="130" height="50" rx="10" fill="#fffbeb" stroke="#f59e0b" stroke-width="1.5"/>
+              <text x="380" y="146" text-anchor="middle" fill="#92400e">CLAIMED</text>
+
+              <!-- DONE -->
+              <rect x="590" y="30"  width="130" height="50" rx="10" fill="#eef2ff" stroke="#6366f1" stroke-width="1.5"/>
+              <text x="655" y="61" text-anchor="middle" fill="#3730a3">DONE</text>
+
+              <!-- FAILED -->
+              <rect x="590" y="115" width="130" height="50" rx="10" fill="#fff1f2" stroke="#f43f5e" stroke-width="1.5"/>
+              <text x="655" y="146" text-anchor="middle" fill="#9f1239">FAILED</text>
+
+              <!-- CANCELED -->
+              <rect x="590" y="200" width="130" height="50" rx="10" fill="#fafafa" stroke="#a1a1aa" stroke-width="1.5"/>
+              <text x="655" y="231" text-anchor="middle" fill="#52525b">CANCELED</text>
+            </g>
+
+            <!-- Arrows -->
+            <g fill="none" stroke="#6366f1" stroke-width="1.75" marker-end="url(#arrowhead-indigo)">
+              <!-- AVAILABLE -> CLAIMED -->
+              <path d="M 170 140 L 315 140"/>
+              <!-- CLAIMED -> DONE -->
+              <path d="M 445 130 C 520 130, 540 60, 590 55"/>
+              <!-- CLAIMED -> FAILED -->
+              <path d="M 445 140 L 590 140"/>
+              <!-- CLAIMED -> CANCELED -->
+              <path d="M 445 150 C 520 150, 540 220, 590 225"/>
+              <!-- AVAILABLE -> CANCELED -->
+              <path d="M 105 165 C 105 230, 400 240, 590 225"/>
+            </g>
+
+            <!-- Labels -->
+            <g font-family="Inter, sans-serif" font-size="11" fill="#4f46e5">
+              <text x="242" y="132" text-anchor="middle">pop</text>
+              <text x="525" y="85"  text-anchor="middle">update DONE</text>
+              <text x="525" y="135" text-anchor="middle">update FAILED</text>
+              <text x="525" y="195" text-anchor="middle">update CANCELED</text>
+              <text x="245" y="225" text-anchor="middle" fill="#71717a">update CANCELED (before claim)</text>
+            </g>
+          </svg>
+
+          <div class="mt-8 grid md:grid-cols-2 gap-x-10 gap-y-3 font-body text-sm text-ink-700">
+            <p><span class="font-mono text-indigo-700 font-semibold">AVAILABLE</span> · eligible to be claimed</p>
+            <p><span class="font-mono text-indigo-700 font-semibold">CLAIMED</span> · owned by a consumer</p>
+            <p><span class="font-mono text-indigo-700 font-semibold">DONE</span> · completed successfully <span class="text-ink-400">(terminal)</span></p>
+            <p><span class="font-mono text-indigo-700 font-semibold">FAILED</span> · attempted, didn't succeed <span class="text-ink-400">(terminal)</span></p>
+            <p class="md:col-span-2"><span class="font-mono text-indigo-700 font-semibold">CANCELED</span> · intentionally abandoned <span class="text-ink-400">(terminal)</span></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Two side notes -->
+      <div class="mt-12 grid md:grid-cols-2 gap-5">
+        <div class="rounded-xl border border-ink-200 bg-white p-7">
+          <h3 class="font-display text-xl font-semibold text-ink-950">FIFO over lifecycles, not keys</h3>
+          <p class="mt-3 font-body text-ink-600 leading-relaxed">
+            Order is determined by enqueue time of each <em>item lifecycle</em>, not by first appearance of a key. Re-pushing an old key puts a new lifecycle at the back of the queue.
+          </p>
+        </div>
+        <div class="rounded-xl border border-ink-200 bg-white p-7">
+          <h3 class="font-display text-xl font-semibold text-ink-950">No duplicate available work</h3>
+          <p class="mt-3 font-body text-ink-600 leading-relaxed">
+            A push is rejected (<span class="inline-code">duplicate_available_key</span>) if the key already has an <span class="inline-code">AVAILABLE</span> lifecycle. Once that lifecycle terminates, the key can be pushed again.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───── CLI Reference ───── -->
+  <section id="cli" class="py-24 md:py-32 border-t border-ink-200 bg-white">
+    <div class="page-shell">
+      <p class="eyebrow mb-5">CLI reference</p>
+      <h2 class="font-display text-4xl md:text-5xl font-bold tracking-tight text-ink-950 max-w-3xl leading-tight">
+        The whole surface, on one page.
+      </h2>
+      <p class="mt-6 max-w-2xl font-body text-lg leading-relaxed text-ink-700">
+        Everything <span class="inline-code">contextq</span> can do in v1. Add <span class="inline-code">--json</span> to any command for machine-readable output and stable error codes.
+      </p>
+
+      <div class="mt-14 grid lg:grid-cols-2 gap-8">
+        <!-- Queue commands -->
+        <div>
+          <h3 class="font-display text-2xl font-semibold text-ink-950 mb-5 flex items-center gap-3">
+            <span class="inline-flex h-7 w-7 items-center justify-center rounded-md bg-indigo-600 text-white font-mono text-xs">Q</span>
+            Queue commands
+          </h3>
+          <div class="space-y-2">
+
+            <div class="rounded-lg border border-ink-200 bg-white p-4 hover:border-indigo-300 transition">
+              <code class="font-mono text-sm text-ink-950"><span class="text-indigo-600">contextq</span> queue list</code>
+              <p class="mt-1.5 font-body text-sm text-ink-600">List all queues, most-recently-modified first.</p>
+            </div>
+
+            <div class="rounded-lg border border-ink-200 bg-white p-4 hover:border-indigo-300 transition">
+              <code class="font-mono text-sm text-ink-950"><span class="text-indigo-600">contextq</span> queue create <span class="text-emerald-600">"&lt;context&gt;"</span> <span class="text-rose-500">--name</span> <span class="text-ink-700">&lt;name&gt;</span></code>
+              <p class="mt-1.5 font-body text-sm text-ink-600">Create a queue. The context string is required and immutable.</p>
+            </div>
+
+            <div class="rounded-lg border border-ink-200 bg-white p-4 hover:border-indigo-300 transition">
+              <code class="font-mono text-sm text-ink-950"><span class="text-indigo-600">contextq</span> queue read <span class="text-ink-700">&lt;queue&gt;</span></code>
+              <p class="mt-1.5 font-body text-sm text-ink-600">Show context, counts, and last-modified info. Refresh before claiming.</p>
+            </div>
+
+            <div class="rounded-lg border border-ink-200 bg-white p-4 hover:border-indigo-300 transition">
+              <code class="font-mono text-sm text-ink-950"><span class="text-indigo-600">contextq</span> queue destroy <span class="text-ink-700">&lt;queue&gt;</span> <span class="text-rose-500">-f</span></code>
+              <p class="mt-1.5 font-body text-sm text-ink-600">Hard delete the queue and its journal. Non-interactive; requires <span class="inline-code">-f</span>.</p>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Item commands -->
+        <div>
+          <h3 class="font-display text-2xl font-semibold text-ink-950 mb-5 flex items-center gap-3">
+            <span class="inline-flex h-7 w-7 items-center justify-center rounded-md bg-indigo-600 text-white font-mono text-xs">I</span>
+            Item commands
+          </h3>
+          <div class="space-y-2">
+
+            <div class="rounded-lg border border-ink-200 bg-white p-4 hover:border-indigo-300 transition">
+              <code class="font-mono text-sm text-ink-950"><span class="text-indigo-600">contextq</span> item push <span class="text-ink-700">&lt;queue&gt; &lt;key&gt;</span></code>
+              <p class="mt-1.5 font-body text-sm text-ink-600">Enqueue a key as a new <span class="inline-code">AVAILABLE</span> lifecycle.</p>
+            </div>
+
+            <div class="rounded-lg border border-ink-200 bg-white p-4 hover:border-indigo-300 transition">
+              <code class="font-mono text-sm text-ink-950"><span class="text-indigo-600">contextq</span> item pop <span class="text-ink-700">&lt;queue&gt;</span></code>
+              <p class="mt-1.5 font-body text-sm text-ink-600">Atomically claim the oldest available item. Runs under the queue lock.</p>
+            </div>
+
+            <div class="rounded-lg border border-ink-200 bg-white p-4 hover:border-indigo-300 transition">
+              <code class="font-mono text-sm text-ink-950"><span class="text-indigo-600">contextq</span> item list <span class="text-ink-700">&lt;queue&gt;</span> <span class="text-rose-500">[--state</span> <span class="text-ink-700">S</span><span class="text-rose-500">] [--key</span> <span class="text-ink-700">K</span><span class="text-rose-500">] [--limit</span> <span class="text-ink-700">N</span><span class="text-rose-500">]</span></code>
+              <p class="mt-1.5 font-body text-sm text-ink-600">List items with optional filters. Useful for rough backlog inspection.</p>
+            </div>
+
+            <div class="rounded-lg border border-ink-200 bg-white p-4 hover:border-indigo-300 transition">
+              <code class="font-mono text-sm text-ink-950"><span class="text-indigo-600">contextq</span> item read <span class="text-ink-700">&lt;queue&gt; &lt;key&gt;</span></code>
+              <p class="mt-1.5 font-body text-sm text-ink-600">Show the most recent lifecycle state and metadata for a key.</p>
+            </div>
+
+            <div class="rounded-lg border border-ink-200 bg-white p-4 hover:border-indigo-300 transition">
+              <code class="font-mono text-sm text-ink-950"><span class="text-indigo-600">contextq</span> item update <span class="text-ink-700">&lt;queue&gt; &lt;key&gt;</span> <span class="text-emerald-600">DONE|FAILED|CANCELED</span></code>
+              <p class="mt-1.5 font-body text-sm text-ink-600">Transition the active lifecycle for a key to a terminal state.</p>
+            </div>
+
+            <div class="rounded-lg border border-ink-200 bg-white p-4 hover:border-indigo-300 transition">
+              <code class="font-mono text-sm text-ink-950"><span class="text-indigo-600">contextq</span> item history <span class="text-ink-700">&lt;queue&gt; &lt;key&gt;</span></code>
+              <p class="mt-1.5 font-body text-sm text-ink-600">Show every lifecycle and transition recorded for a key.</p>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Global flags + error codes -->
+      <div class="mt-12 grid md:grid-cols-2 gap-5">
+        <div class="rounded-xl border border-ink-200 bg-ink-50/60 p-6">
+          <h4 class="font-display text-lg font-semibold text-ink-950">Global flags</h4>
+          <dl class="mt-4 space-y-2.5 font-body text-sm text-ink-700">
+            <div class="flex gap-3">
+              <dt class="inline-code shrink-0">--json</dt>
+              <dd>Emit structured output for parsing.</dd>
+            </div>
+            <div class="flex gap-3">
+              <dt class="inline-code shrink-0">--root &lt;path&gt;</dt>
+              <dd>Override filesystem storage root.</dd>
+            </div>
+            <div class="flex gap-3">
+              <dt class="inline-code shrink-0">--config &lt;path&gt;</dt>
+              <dd>Use a specific <span class="inline-code">contextq.config</span> file.</dd>
+            </div>
+          </dl>
+        </div>
+
+        <div class="rounded-xl border border-ink-200 bg-ink-50/60 p-6">
+          <h4 class="font-display text-lg font-semibold text-ink-950">Stable error codes</h4>
+          <dl class="mt-4 space-y-2.5 font-body text-sm text-ink-700">
+            <div class="flex gap-3">
+              <dt class="inline-code shrink-0">duplicate_available_key</dt>
+              <dd>Key already has an <span class="inline-code">AVAILABLE</span> lifecycle.</dd>
+            </div>
+            <div class="flex gap-3">
+              <dt class="inline-code shrink-0">no_available_items</dt>
+              <dd>Nothing to claim right now.</dd>
+            </div>
+            <div class="flex gap-3">
+              <dt class="inline-code shrink-0">invalid_state_transition</dt>
+              <dd>Requested transition is disallowed.</dd>
+            </div>
+            <div class="flex gap-3">
+              <dt class="inline-code shrink-0">no_active_lifecycle</dt>
+              <dd>Key has no non-terminal lifecycle to update.</dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───── Agent Skill ───── -->
+  <section id="agent-skill" class="py-24 md:py-32 border-t border-ink-200">
+    <div class="page-shell">
+      <div class="grid lg:grid-cols-12 gap-12 items-start">
+        <div class="lg:col-span-5">
+          <p class="eyebrow mb-5">Agent skill</p>
+          <h2 class="font-display text-4xl md:text-5xl font-bold tracking-tight text-ink-950 leading-tight">
+            Tightly coupled with the agent.
+          </h2>
+          <p class="mt-6 font-body text-lg leading-relaxed text-ink-700">
+            ContextQ ships with a canonical <span class="inline-code">AGENT_SKILL.md</span> — the contract every agent reads before invoking the CLI. The skill is the missing link between a generic LLM and a piece of project-aware tooling.
+          </p>
+
+          <ul class="mt-8 space-y-4 font-body text-ink-700">
+            <li class="flex gap-3">
+              <span class="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-600"></span>
+              <span><strong class="text-ink-950">Read the queue before acting.</strong> Queue context <em>is</em> task guidance.</span>
+            </li>
+            <li class="flex gap-3">
+              <span class="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-600"></span>
+              <span><strong class="text-ink-950">Re-read immediately before claiming.</strong> Other agents may have moved on.</span>
+            </li>
+            <li class="flex gap-3">
+              <span class="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-600"></span>
+              <span><strong class="text-ink-950">Claim with <span class="inline-code">item pop</span>.</strong> Never pick from <span class="inline-code">item list</span> and assume it's still available.</span>
+            </li>
+            <li class="flex gap-3">
+              <span class="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-600"></span>
+              <span><strong class="text-ink-950">Update as soon as the outcome is known.</strong> <span class="inline-code">DONE</span>, <span class="inline-code">FAILED</span>, or <span class="inline-code">CANCELED</span>.</span>
+            </li>
+            <li class="flex gap-3">
+              <span class="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-600"></span>
+              <span><strong class="text-ink-950">Parse <span class="inline-code">--json</span>.</strong> Branch on the <span class="inline-code">code</span> field, not the prose.</span>
+            </li>
+          </ul>
+
+          <a href="https://github.com/norlinga/contextq/blob/main/AGENT_SKILL.md" target="_blank" rel="noopener" class="mt-10 inline-flex items-center gap-2 font-body text-sm font-medium text-indigo-700 hover:text-indigo-900">
+            Read the full skill
+            <svg viewBox="0 0 20 20" class="h-4 w-4" fill="currentColor"><path d="M10.293 3.293a1 1 0 0 1 1.414 0l6 6a1 1 0 0 1 0 1.414l-6 6a1 1 0 0 1-1.414-1.414L14.586 11H3a1 1 0 1 1 0-2h11.586l-4.293-4.293a1 1 0 0 1 0-1.414Z"/></svg>
+          </a>
+        </div>
+
+        <div class="lg:col-span-7">
+          <div class="terminal-wrap">
+            <button class="copy-btn" data-target="t-skill">Copy</button>
+            <div class="terminal">
+              <div class="terminal-header">
+                <span class="terminal-dot red"></span><span class="terminal-dot yellow"></span><span class="terminal-dot green"></span>
+                <span class="terminal-title">recommended agent loop</span>
+              </div>
+              <div class="terminal-body" id="t-skill">
+<span class="muted"># 1. discover queues</span>
+<span class="prompt"></span><span class="token function">contextq</span> <span class="token builtin">queue</span> <span class="token builtin">list</span>
+
+<span class="muted"># 2. read context and follow it</span>
+<span class="prompt"></span><span class="token function">contextq</span> <span class="token builtin">queue</span> <span class="token builtin">read</span> refactor
+
+<span class="muted"># 3. (optional) inspect backlog</span>
+<span class="prompt"></span><span class="token function">contextq</span> <span class="token builtin">item</span> <span class="token builtin">list</span> refactor <span class="token parameter">--state</span> AVAILABLE
+
+<span class="muted"># 4. refresh before claiming</span>
+<span class="prompt"></span><span class="token function">contextq</span> <span class="token builtin">queue</span> <span class="token builtin">read</span> refactor
+
+<span class="muted"># 5. atomically claim</span>
+<span class="prompt"></span><span class="token function">contextq</span> <span class="token parameter">--json</span> <span class="token builtin">item</span> <span class="token builtin">pop</span> refactor
+<span class="token punctuation">{</span> <span class="token property">"key"</span><span class="token punctuation">:</span> <span class="token string">"internal/cli/root.go"</span><span class="token punctuation">,</span> <span class="token property">"state"</span><span class="token punctuation">:</span> <span class="token string">"CLAIMED"</span> <span class="token punctuation">}</span>
+
+<span class="muted"># 6. …do the work…</span>
+
+<span class="muted"># 7. update the outcome</span>
+<span class="prompt"></span><span class="token function">contextq</span> <span class="token builtin">item</span> <span class="token builtin">update</span> refactor <span class="keylit">internal/cli/root.go</span> <span class="ok">DONE</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 rounded-xl border border-indigo-200 bg-indigo-50/60 p-5">
+            <p class="font-body text-sm text-indigo-900 leading-relaxed">
+              <strong class="font-semibold">Why this matters:</strong> the skill plus the CLI plus the project-local <span class="inline-code">contextq.config</span> form a tight loop. The agent doesn't need to invent a coordination protocol every session — the tool teaches it the protocol on first read.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───── Footer ───── -->
+  <footer class="border-t border-ink-200 bg-white">
+    <div class="page-shell py-16">
+      <div class="grid md:grid-cols-3 gap-10">
+
+        <div class="md:col-span-2 max-w-md">
+          <div class="flex items-center gap-3 mb-4">
+            <img src="./assets/logo.svg" class="h-8 w-8" alt="">
+            <span class="font-display text-lg font-bold tracking-tight text-ink-950">contextq</span>
+          </div>
+          <p class="font-body text-sm text-ink-600 leading-relaxed">
+            An experiment in tightly-coupled agent skills and narrowly-focused, agent-facing CLI tooling. Local-first. Inspectable. Small enough to read end-to-end.
+          </p>
+        </div>
+
+        <div>
+          <p class="eyebrow mb-4 text-ink-400">Project</p>
+          <ul class="space-y-2 font-body text-sm text-ink-600">
+            <li><a href="https://github.com/norlinga/contextq" target="_blank" rel="noopener" class="hover:text-ink-950 transition">GitHub repository</a></li>
+            <li><a href="https://github.com/norlinga/contextq/blob/main/docs/v1-spec.md" target="_blank" rel="noopener" class="hover:text-ink-950 transition">v1 specification</a></li>
+            <li><a href="https://github.com/norlinga/contextq/blob/main/AGENT_SKILL.md" target="_blank" rel="noopener" class="hover:text-ink-950 transition">Agent skill</a></li>
+            <li><a href="https://github.com/norlinga/contextq/blob/main/LICENSE" target="_blank" rel="noopener" class="hover:text-ink-950 transition">License (MIT)</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mt-14 pt-8 border-t border-ink-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <p class="font-body text-xs text-ink-400">© <span id="year"></span> Aaron Norling. MIT licensed.</p>
+        <p class="font-body text-xs text-ink-400">
+          Built for the <span class="text-ink-600">agent-facing</span> future.
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  </main>
+
+  <script>
+    // ── Year ──
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // ── Scrollspy ──
+    const navLinks = Array.from(document.querySelectorAll('.nav-link'));
+    const sectionIds = navLinks.map(a => a.getAttribute('href').slice(1));
+    const sections = sectionIds.map(id => document.getElementById(id)).filter(Boolean);
+
+    function setActive(id) {
+      navLinks.forEach(a => {
+        a.dataset.active = (a.getAttribute('href') === '#' + id) ? 'true' : 'false';
+      });
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      // Pick the entry closest to the top that's intersecting
+      const visible = entries
+        .filter(e => e.isIntersecting)
+        .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+      if (visible.length > 0) {
+        setActive(visible[0].target.id);
+      }
+    }, {
+      rootMargin: '-25% 0px -65% 0px',
+      threshold: 0,
+    });
+
+    sections.forEach(s => observer.observe(s));
+
+    // Reflect clicked anchor immediately
+    navLinks.forEach(a => {
+      a.addEventListener('click', () => {
+        const id = a.getAttribute('href').slice(1);
+        setActive(id);
+      });
+    });
+
+    // ── Copy buttons ──
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const targetId = btn.dataset.target;
+        const target = document.getElementById(targetId);
+        if (!target) return;
+        const text = target.innerText.replace(/ /g, ' ');
+        try {
+          await navigator.clipboard.writeText(text);
+          const original = btn.textContent;
+          btn.classList.add('copied');
+          btn.textContent = 'Copied';
+          setTimeout(() => {
+            btn.classList.remove('copied');
+            btn.textContent = original;
+          }, 1400);
+        } catch (e) {
+          btn.textContent = 'Err';
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>
