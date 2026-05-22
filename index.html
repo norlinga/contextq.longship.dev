@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>contextq — Local queues for AI agents</title>
-  <meta name="description" content="ContextQ is a tiny local CLI for agent coordination: named queues with agent-facing context, FIFO claims over string keys, and a durable event journal. Designed for tightly-coupled agent skills and narrow agent-facing tooling.">
+  <meta name="description" content="contextq is a tiny local CLI for agent coordination: named queues with agent-facing context, FIFO keys, and a durable on-disk journal.">
   <meta property="og:title" content="contextq — Local queues for AI agents">
-  <meta property="og:description" content="A tiny local CLI for agent coordination: named queues, FIFO claims, a durable event journal.">
+  <meta property="og:description" content="contextq is a tiny local CLI for agent coordination: named queues, FIFO keys, and a durable on-disk journal.">
   <meta property="og:type" content="website">
   <link rel="icon" type="image/svg+xml" href="/assets/logo.svg">
 
@@ -49,18 +49,18 @@
     <div class="hero-grid absolute inset-0 -z-10" aria-hidden="true"></div>
 
     <div class="page-shell pt-20 pb-24 md:pt-28 md:pb-32">
-      <div class="grid lg:grid-cols-12 gap-14 items-center">
+      <div class="grid lg:grid-cols-2 gap-10 lg:gap-12 items-center">
 
-        <div class="lg:col-span-7">
+        <div>
           <p class="eyebrow mb-6">Open source · MIT</p>
 
-          <h1 class="font-display font-bold tracking-tight text-ink-950 text-5xl md:text-6xl lg:text-7xl leading-[1.04]">
+          <h1 class="font-display font-bold tracking-tight text-ink-950 text-4xl md:text-5xl lg:text-6xl leading-[1.04]">
             Local queues<br>
             for <span class="text-indigo-700">agents</span>.
           </h1>
 
-          <p class="mt-8 max-w-2xl font-body text-lg md:text-xl leading-relaxed text-ink-700">
-            <strong class="text-ink-950 font-semibold">ContextQ</strong> is a tiny local CLI for agent coordination: named queues with agent-facing context, FIFO claims over string keys, and a durable event journal you can read off disk. An experiment in the kind of <em>narrow, agent-facing tooling</em> that lets agents stay focused without bloating their context windows.
+          <p class="mt-8 font-body text-lg md:text-xl leading-relaxed text-ink-700">
+            <strong class="text-ink-950 font-semibold">contextq</strong> is a tiny local CLI for coordinating agent work: named queues with built-in context, FIFO keys, and a durable journal on disk. No daemon, no server — just files and a small binary. Built for <em>narrow, agent-facing tooling</em> that stays predictable and out of the context window.
           </p>
 
           <div class="mt-10 flex flex-wrap items-center gap-4">
@@ -80,8 +80,8 @@
           </p>
         </div>
 
-        <div class="lg:col-span-5">
-          <div class="terminal-wrap">
+        <div class="min-w-0">
+          <div class="terminal-wrap h-full">
             <button class="copy-btn" data-target="hero-term">Copy</button>
             <div class="terminal">
               <div class="terminal-header">
@@ -132,7 +132,7 @@
           "Good agent-facing tools are <em class="text-indigo-300 not-italic font-semibold">narrow</em>, <em class="text-indigo-300 not-italic font-semibold">predictable</em>, and <em class="text-indigo-300 not-italic font-semibold">deterministic</em>. They give agents structured answers instead of ambiguous prose — keeping context windows focused, response times short, and behavior on a known path."
         </blockquote>
         <p class="mt-6 font-body text-sm text-white/50 max-w-3xl leading-relaxed">
-          ContextQ is one small experiment in that direction: a CLI shaped specifically for how an agent reads, claims, and reports on work — paired with a tightly-coupled <a href="#agent-skill" class="text-indigo-300 hover:text-indigo-200 underline-offset-4 hover:underline">Agent Skill</a> the agent reads first.
+          contextq is one small experiment in that direction: a CLI shaped for how an agent reads a queue, claims FIFO work, and reports outcomes — paired with a tightly-coupled <a href="#agent-skill" class="text-indigo-300 hover:text-indigo-200 underline-offset-4 hover:underline">Agent Skill</a> the agent reads first.
         </p>
       </div>
 
@@ -163,7 +163,7 @@
             Tools that enforce a protocol
           </h3>
           <p class="mt-3 font-body text-ink-600 leading-relaxed">
-            ContextQ rejects races, duplicate work, and invalid state transitions at the CLI boundary — so the agent's plan can't drift into shapes the system was never built to handle.
+            contextq rejects races, duplicate work, and invalid state transitions at the CLI boundary — so the agent's plan can't drift into shapes the system was never built to handle.
           </p>
         </article>
       </div>
@@ -173,12 +173,12 @@
   <!-- ───── What it is ───── -->
   <section id="what" class="py-24 md:py-32 border-t border-ink-200">
     <div class="page-shell">
-      <p class="eyebrow mb-5">What ContextQ is</p>
+      <p class="eyebrow mb-5">What contextq is</p>
       <h2 class="font-display text-4xl md:text-5xl font-bold tracking-tight text-ink-950 max-w-3xl leading-tight">
         A small, local coordination primitive.
       </h2>
       <p class="mt-6 max-w-2xl font-body text-lg leading-relaxed text-ink-700">
-        ContextQ keeps project-specific named queues on disk to coordinate multi-agent work — or single-agent work split across time — without each turn rebuilding context from Markdown sprawl.
+        contextq keeps project-specific named queues on disk to coordinate multi-agent work — or single-agent work split across time — without each turn rebuilding context from Markdown sprawl.
       </p>
 
       <div class="mt-14 grid md:grid-cols-3 gap-5">
@@ -198,7 +198,7 @@
           </div>
           <h3 class="font-display text-xl font-semibold text-ink-950">FIFO over string keys</h3>
           <p class="mt-3 font-body text-ink-600 leading-relaxed">
-            Work items are bare string keys — file paths, issue IDs, task IDs. <span class="inline-code">pop</span> atomically claims the oldest available item; a key can be re-enqueued for a fresh lifecycle.
+            Work items are bare string keys — file paths, issue IDs, task IDs. <span class="inline-code">item pop</span> is the <strong class="text-ink-950 font-semibold">only</strong> way to take work: it atomically claims the oldest available item (FIFO). There is no cherry-picking from <span class="inline-code">item list</span> or counts from <span class="inline-code">queue read</span>. A key can be re-enqueued for a fresh lifecycle.
           </p>
         </article>
 
@@ -224,7 +224,7 @@
         </div>
         <div class="rounded-xl border border-ink-200 bg-ink-50/60 p-6">
           <p class="font-display text-2xl font-semibold text-ink-950">Concurrency-safe</p>
-          <p class="mt-2 font-body text-sm text-ink-600 leading-relaxed">Per-queue file lock serializes mutations. <span class="inline-code">pop</span> runs under the lock so claims never race.</p>
+          <p class="mt-2 font-body text-sm text-ink-600 leading-relaxed">Per-queue file lock serializes mutations. <span class="inline-code">item pop</span> runs under the lock — the sole dequeue/claim path, with no races.</p>
         </div>
       </div>
     </div>
@@ -238,7 +238,7 @@
         Five commands and you're coordinating.
       </h2>
       <p class="mt-6 max-w-2xl font-body text-lg leading-relaxed text-ink-700">
-        Install, create a queue with agent-facing context, push some work, claim it, and complete it.
+        Install, create a queue with agent-facing context, push some work, take the next item with <span class="inline-code">item pop</span>, and complete it.
       </p>
 
       <div class="mt-12 grid lg:grid-cols-2 gap-10">
@@ -250,7 +250,7 @@
             <h3 class="font-display text-2xl font-semibold text-ink-950">Install</h3>
           </div>
           <p class="font-body text-ink-600 leading-relaxed mb-5">
-            Build from source. ContextQ is a single Go binary with no runtime dependencies.
+            Build from source. contextq is a single Go binary with no runtime dependencies.
           </p>
           <div class="terminal-wrap">
             <button class="copy-btn" data-target="t-install">Copy</button>
@@ -323,6 +323,7 @@
 <span class="prompt"></span><span class="token function">contextq</span> <span class="token builtin">item</span> <span class="token builtin">push</span> refactor <span class="keylit">internal/domain/queue.go</span>
 
 <span class="prompt"></span><span class="token function">contextq</span> <span class="token builtin">queue</span> <span class="token builtin">read</span> refactor
+<span class="muted"># counts are informational — FIFO order is enforced by pop, not by picking a key</span>
 <span class="muted">queue</span> refactor
 <span class="muted">items</span> <span class="ok">3 available</span> · 0 claimed · 0 done
               </div>
@@ -337,7 +338,7 @@
             <h3 class="font-display text-2xl font-semibold text-ink-950">Pop &amp; complete</h3>
           </div>
           <p class="font-body text-ink-600 leading-relaxed mb-5">
-            <span class="inline-code">pop</span> atomically claims the oldest available item under the queue's file lock — no races.
+            <span class="inline-code">item pop</span> is the <strong class="text-ink-950 font-semibold">only</strong> way to take work from the queue. It atomically claims the oldest available item under the queue's file lock — no races, no manual <span class="inline-code">CLAIMED</span>.
           </p>
           <div class="terminal-wrap">
             <button class="copy-btn" data-target="t-pop">Copy</button>
@@ -348,6 +349,7 @@
               </div>
               <div class="terminal-body" id="t-pop">
 <span class="prompt"></span><span class="token function">contextq</span> <span class="token parameter">--json</span> <span class="token builtin">item</span> <span class="token builtin">pop</span> refactor
+<span class="muted"># CLAIMED in output means pop succeeded — never pass CLAIMED to update</span>
 <span class="token punctuation">{</span>
   <span class="token property">"key"</span><span class="token punctuation">:</span> <span class="token string">"internal/cli/root.go"</span><span class="token punctuation">,</span>
   <span class="token property">"state"</span><span class="token punctuation">:</span> <span class="token string">"CLAIMED"</span><span class="token punctuation">,</span>
@@ -435,7 +437,7 @@
       <div class="mt-16">
         <h3 class="font-display text-2xl font-semibold text-ink-950 mb-2">State machine</h3>
         <p class="font-body text-ink-600 leading-relaxed max-w-2xl mb-8">
-          Five states, five legal transitions. Terminal states are terminal — to retry, push the key again.
+          Five states, five legal transitions. <span class="inline-code">AVAILABLE</span> → <span class="inline-code">CLAIMED</span> happens <strong class="text-ink-950 font-semibold">only</strong> via <span class="inline-code">item pop</span> — you cannot set <span class="inline-code">CLAIMED</span> with <span class="inline-code">item update</span>. Terminal states are terminal — to retry, push the key again.
         </p>
 
         <div class="rounded-xl border border-ink-200 bg-white p-8 md:p-12 shadow-card">
@@ -451,7 +453,7 @@
             <span class="state-pill state-canceled"><span class="h-1.5 w-1.5 rounded-full bg-ink-400"></span>CANCELED</span>
           </div>
 
-          <svg viewBox="0 0 760 280" class="w-full h-auto" role="img" aria-label="ContextQ item state diagram">
+          <svg viewBox="0 0 760 280" class="w-full h-auto" role="img" aria-label="contextq item state diagram">
             <defs>
               <marker id="arrowhead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
                 <path d="M0,0 L10,5 L0,10 Z" fill="#a1a1aa"/>
@@ -509,8 +511,8 @@
           </svg>
 
           <div class="mt-8 grid md:grid-cols-2 gap-x-10 gap-y-3 font-body text-sm text-ink-700">
-            <p><span class="font-mono text-indigo-700 font-semibold">AVAILABLE</span> · eligible to be claimed</p>
-            <p><span class="font-mono text-indigo-700 font-semibold">CLAIMED</span> · owned by a consumer</p>
+            <p><span class="font-mono text-indigo-700 font-semibold">AVAILABLE</span> · eligible to be claimed via <span class="inline-code">item pop</span> only</p>
+            <p><span class="font-mono text-indigo-700 font-semibold">CLAIMED</span> · owned by a consumer after a successful <span class="inline-code">pop</span></p>
             <p><span class="font-mono text-indigo-700 font-semibold">DONE</span> · completed successfully <span class="text-ink-400">(terminal)</span></p>
             <p><span class="font-mono text-indigo-700 font-semibold">FAILED</span> · attempted, didn't succeed <span class="text-ink-400">(terminal)</span></p>
             <p class="md:col-span-2"><span class="font-mono text-indigo-700 font-semibold">CANCELED</span> · intentionally abandoned <span class="text-ink-400">(terminal)</span></p>
@@ -547,6 +549,12 @@
         Everything <span class="inline-code">contextq</span> can do in v1. Add <span class="inline-code">--json</span> to any command for machine-readable output and stable error codes.
       </p>
 
+      <div class="mt-10 rounded-xl border border-amber-200 bg-amber-50/80 p-6 max-w-3xl">
+        <p class="font-body text-sm text-amber-950 leading-relaxed">
+          <strong class="font-semibold">Taking work:</strong> use <span class="inline-code">item pop</span> only. <span class="inline-code">item list</span>, <span class="inline-code">item read</span>, and <span class="inline-code">queue read</span> may show available keys or counts, but they do not reserve or claim work — another agent may <span class="inline-code">pop</span> between your inspection and your next command.
+        </p>
+      </div>
+
       <div class="mt-14 grid lg:grid-cols-2 gap-8">
         <!-- Queue commands -->
         <div>
@@ -568,7 +576,7 @@
 
             <div class="rounded-lg border border-ink-200 bg-white p-4 hover:border-indigo-300 transition">
               <code class="font-mono text-sm text-ink-950"><span class="text-indigo-600">contextq</span> queue read <span class="text-ink-700">&lt;queue&gt;</span></code>
-              <p class="mt-1.5 font-body text-sm text-ink-600">Show context, counts, and last-modified info. Refresh before claiming.</p>
+              <p class="mt-1.5 font-body text-sm text-ink-600">Show context, counts, and last-modified info. Counts are informational only — refresh before <span class="inline-code">item pop</span>, not to pick a key.</p>
             </div>
 
             <div class="rounded-lg border border-ink-200 bg-white p-4 hover:border-indigo-300 transition">
@@ -592,24 +600,24 @@
               <p class="mt-1.5 font-body text-sm text-ink-600">Enqueue a key as a new <span class="inline-code">AVAILABLE</span> lifecycle.</p>
             </div>
 
-            <div class="rounded-lg border border-ink-200 bg-white p-4 hover:border-indigo-300 transition">
+            <div class="rounded-lg border border-indigo-200 bg-indigo-50/40 p-4">
               <code class="font-mono text-sm text-ink-950"><span class="text-indigo-600">contextq</span> item pop <span class="text-ink-700">&lt;queue&gt;</span></code>
-              <p class="mt-1.5 font-body text-sm text-ink-600">Atomically claim the oldest available item. Runs under the queue lock.</p>
+              <p class="mt-1.5 font-body text-sm text-ink-600"><strong class="text-ink-950">Only way to take work.</strong> Atomically pops the oldest available item (FIFO) under the queue lock. Returns <span class="inline-code">CLAIMED</span> — that state is not set via <span class="inline-code">update</span>.</p>
             </div>
 
             <div class="rounded-lg border border-ink-200 bg-white p-4 hover:border-indigo-300 transition">
               <code class="font-mono text-sm text-ink-950"><span class="text-indigo-600">contextq</span> item list <span class="text-ink-700">&lt;queue&gt;</span> <span class="text-rose-500">[--state</span> <span class="text-ink-700">S</span><span class="text-rose-500">] [--key</span> <span class="text-ink-700">K</span><span class="text-rose-500">] [--limit</span> <span class="text-ink-700">N</span><span class="text-rose-500">]</span></code>
-              <p class="mt-1.5 font-body text-sm text-ink-600">List items with optional filters. Useful for rough backlog inspection.</p>
+              <p class="mt-1.5 font-body text-sm text-ink-600">Observation only — inspect backlog with optional filters. <strong class="text-ink-950">Do not use to choose work to claim;</strong> always <span class="inline-code">item pop</span>.</p>
             </div>
 
             <div class="rounded-lg border border-ink-200 bg-white p-4 hover:border-indigo-300 transition">
               <code class="font-mono text-sm text-ink-950"><span class="text-indigo-600">contextq</span> item read <span class="text-ink-700">&lt;queue&gt; &lt;key&gt;</span></code>
-              <p class="mt-1.5 font-body text-sm text-ink-600">Show the most recent lifecycle state and metadata for a key.</p>
+              <p class="mt-1.5 font-body text-sm text-ink-600">Show the most recent lifecycle state and metadata for a key. For debugging or after <span class="inline-code">pop</span> — not a substitute for claiming.</p>
             </div>
 
             <div class="rounded-lg border border-ink-200 bg-white p-4 hover:border-indigo-300 transition">
               <code class="font-mono text-sm text-ink-950"><span class="text-indigo-600">contextq</span> item update <span class="text-ink-700">&lt;queue&gt; &lt;key&gt;</span> <span class="text-emerald-600">DONE|FAILED|CANCELED</span></code>
-              <p class="mt-1.5 font-body text-sm text-ink-600">Transition the active lifecycle for a key to a terminal state.</p>
+              <p class="mt-1.5 font-body text-sm text-ink-600">Transition the active lifecycle for a key to a terminal state. Only after you own the key via <span class="inline-code">pop</span> (<span class="inline-code">CLAIMED</span> is never an <span class="inline-code">update</span> target).</p>
             </div>
 
             <div class="rounded-lg border border-ink-200 bg-white p-4 hover:border-indigo-300 transition">
@@ -650,7 +658,7 @@
             </div>
             <div class="flex gap-3">
               <dt class="inline-code shrink-0">no_available_items</dt>
-              <dd>Nothing to claim right now.</dd>
+              <dd>Nothing to <span class="inline-code">pop</span> right now.</dd>
             </div>
             <div class="flex gap-3">
               <dt class="inline-code shrink-0">invalid_state_transition</dt>
@@ -676,21 +684,21 @@
             Tightly coupled with the agent.
           </h2>
           <p class="mt-6 font-body text-lg leading-relaxed text-ink-700">
-            ContextQ ships with a canonical <span class="inline-code">AGENT_SKILL.md</span> — the contract every agent reads before invoking the CLI. The skill is the missing link between a generic LLM and a piece of project-aware tooling.
+            contextq ships with a canonical <span class="inline-code">AGENT_SKILL.md</span> — the contract every agent reads before invoking the CLI. The skill is the missing link between a generic LLM and a piece of project-aware tooling.
           </p>
 
           <ul class="mt-8 space-y-4 font-body text-ink-700">
+            <li class="flex gap-3">
+              <span class="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-600"></span>
+              <span><strong class="text-ink-950">Take work only with <span class="inline-code">item pop</span>.</strong> Listing, reading keys, and queue counts are inspection only — never choose a key from <span class="inline-code">item list</span> or <span class="inline-code">queue read</span> and treat it as yours. <span class="inline-code">CLAIMED</span> is set by <span class="inline-code">pop</span>, not <span class="inline-code">update</span>.</span>
+            </li>
             <li class="flex gap-3">
               <span class="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-600"></span>
               <span><strong class="text-ink-950">Read the queue before acting.</strong> Queue context <em>is</em> task guidance.</span>
             </li>
             <li class="flex gap-3">
               <span class="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-600"></span>
-              <span><strong class="text-ink-950">Re-read immediately before claiming.</strong> Other agents may have moved on.</span>
-            </li>
-            <li class="flex gap-3">
-              <span class="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-600"></span>
-              <span><strong class="text-ink-950">Claim with <span class="inline-code">item pop</span>.</strong> Never pick from <span class="inline-code">item list</span> and assume it's still available.</span>
+              <span><strong class="text-ink-950">Re-read immediately before <span class="inline-code">pop</span>.</strong> Other agents may have moved on.</span>
             </li>
             <li class="flex gap-3">
               <span class="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-600"></span>
@@ -723,13 +731,13 @@
 <span class="muted"># 2. read context and follow it</span>
 <span class="prompt"></span><span class="token function">contextq</span> <span class="token builtin">queue</span> <span class="token builtin">read</span> refactor
 
-<span class="muted"># 3. (optional) inspect backlog</span>
+<span class="muted"># 3. (optional) inspect backlog — do not claim from this output</span>
 <span class="prompt"></span><span class="token function">contextq</span> <span class="token builtin">item</span> <span class="token builtin">list</span> refactor <span class="token parameter">--state</span> AVAILABLE
 
-<span class="muted"># 4. refresh before claiming</span>
+<span class="muted"># 4. refresh context before pop (not to pick a key)</span>
 <span class="prompt"></span><span class="token function">contextq</span> <span class="token builtin">queue</span> <span class="token builtin">read</span> refactor
 
-<span class="muted"># 5. atomically claim</span>
+<span class="muted"># 5. only way to take work — pop assigns CLAIMED</span>
 <span class="prompt"></span><span class="token function">contextq</span> <span class="token parameter">--json</span> <span class="token builtin">item</span> <span class="token builtin">pop</span> refactor
 <span class="token punctuation">{</span> <span class="token property">"key"</span><span class="token punctuation">:</span> <span class="token string">"internal/cli/root.go"</span><span class="token punctuation">,</span> <span class="token property">"state"</span><span class="token punctuation">:</span> <span class="token string">"CLAIMED"</span> <span class="token punctuation">}</span>
 
@@ -743,7 +751,7 @@
 
           <div class="mt-6 rounded-xl border border-indigo-200 bg-indigo-50/60 p-5">
             <p class="font-body text-sm text-indigo-900 leading-relaxed">
-              <strong class="font-semibold">Why this matters:</strong> the skill plus the CLI plus the project-local <span class="inline-code">contextq.config</span> form a tight loop. The agent doesn't need to invent a coordination protocol every session — the tool teaches it the protocol on first read.
+              <strong class="font-semibold">Why this matters:</strong> the skill plus the CLI plus the project-local <span class="inline-code">contextq.config</span> form a tight loop. The agent doesn't need to invent a coordination protocol every session — the tool teaches it the protocol on first read, including the rule that <span class="inline-code">item pop</span> is the sole path from available work to owned work.
             </p>
           </div>
         </div>
